@@ -1,48 +1,35 @@
 """
-Database Schemas
+Database Schemas for NEUST Museum
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model corresponds to a MongoDB collection. The collection name
+is the lowercase of the class name (e.g., Artifact -> "artifact").
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-# Example schemas (replace with your own):
 
-class User(BaseModel):
+class Artifact(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Museum artifacts and collections
+    Collection name: "artifact"
+    """
+    title: str = Field(..., description="Artifact title")
+    description: Optional[str] = Field(None, description="Detailed description")
+    image_url: Optional[str] = Field(None, description="Public image URL")
+    period: Optional[str] = Field(None, description="Historical period or year")
+    collection: Optional[str] = Field(None, description="Collection name")
+    tags: Optional[List[str]] = Field(default=None, description="Search tags")
+    featured: bool = Field(default=False, description="Whether to show on homepage")
+
+
+class UserAccount(BaseModel):
+    """
+    Registered users for sign-in/up
+    Collection name: "useraccount"
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
-
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    email: EmailStr = Field(..., description="Unique email address")
+    password_hash: str = Field(..., description="Password hash (SHA256 for demo)")
+    role: str = Field(default="user", description="Role: user/admin")
+    is_active: bool = Field(default=True)
